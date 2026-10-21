@@ -1,0 +1,10 @@
+services:
+  web:
+    image: cs554-midterm:v1
+    pull_policy: never
+    environment:
+      PORT: "8080"
+      SERVICE_NAME: "cs554-midterm-compose"
+      MESSAGE: "Hello from Docker Compose inside the VM!"
+    ports:
+      - "8080:8080"

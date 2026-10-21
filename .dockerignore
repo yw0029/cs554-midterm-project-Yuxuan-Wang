@@ -1,0 +1,11 @@
+.git
+.gitignore
+node_modules
+npm-debug.log*
+.env
+test/
+evidence/
+README.md
+*.zip
+.DS_Store
+Thumbs.db

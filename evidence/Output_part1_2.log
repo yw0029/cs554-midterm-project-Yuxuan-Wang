@@ -1,0 +1,658 @@
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ node -v
+v22.23.3
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ npm -v
+10.9.9
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ npm test
+
+> cs454-midterm-starter@1.0.0 test
+> node --test test/service.test.js
+
+{"method":"GET","path":"/","status":200}
+{"method":"GET","path":"/health","status":200}
+{"method":"GET","path":"/","status":200}
+{"method":"GET","path":"/missing","status":404}
+{"method":"GET","path":"/","status":200}
+✔ configured responses, local counter, health, and fresh instance (39.330684ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 113.161705
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ npm start
+
+> cs454-midterm-starter@1.0.0 start
+> node src/server.js
+
+Listening on port 8080
+{"method":"GET","path":"/","status":200}
+{"method":"GET","path":"/health","status":200}
+{"method":"GET","path":"/","status":200}
+{"method":"GET","path":"/","status":200}
+{"method":"GET","path":"/health","status":200}
+{"method":"GET","path":"/","status":200}
+^CReceived SIGINT; stopping.
+
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ PORT=8090 SERVICE_NAME=cs554-midterm MESSAGE="Hello from CS554" npm start
+
+> cs454-midterm-starter@1.0.0 start
+> node src/server.js
+
+Listening on port 8090
+{"method":"GET","path":"/","status":200}
+{"method":"GET","path":"/health","status":200}
+^CReceived SIGINT; stopping.
+
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ touch Dockerfile
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ cat Dockerfile
+FROM node:22.23.3-bookworm-slim
+
+WORKDIR /app
+
+COPY --chown=node:node package.json ./
+COPY --chown=node:node src/ ./src/
+
+USER node
+
+EXPOSE 8080
+
+CMD ["node", "src/server.js"]
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ touch .dockerignore
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ cat .dockerignore
+.git
+.gitignore
+node_modules
+npm-debug.log*
+.env
+test/
+demo/
+README.md
+*.zip
+.DS_Store
+Thumbs.db
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ docker version
+Client:
+ Version:           29.8.0
+ API version:       1.56
+ Go version:        go1.26.8
+ Git commit:        88096ef
+ Built:             Wed Sep 23 15:26:13 2026
+ OS/Arch:           linux/amd64
+ Context:           default
+permission denied while trying to connect to the docker API at unix:///var/run/docker.sock
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo docker version
+[sudo] password for yuxuan: 
+Client:
+ Version:           29.8.0
+ API version:       1.56
+ Go version:        go1.26.8
+ Git commit:        88096ef
+ Built:             Wed Sep 23 15:26:13 2026
+ OS/Arch:           linux/amd64
+ Context:           default
+
+Server:
+ Engine:
+  Version:          29.8.0
+  API version:      1.56 (minimum version 1.40)
+  Go version:       go1.26.8
+  Git commit:       3ce5872
+  Built:            Wed Sep 23 15:26:53 2026
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          v2.3.4
+  GitCommit:        db8809540e1a7a9da5d518876894933ff55692ab
+ runc:
+  Version:          1.5.1
+  GitCommit:        
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo docker build -t cs554-midterm:v1 .
+[sudo] password for yuxuan: 
+[+] Building 3.9s (9/9) FINISHED                                                                                                                                                             docker:default
+ => [internal] load build definition from Dockerfile                                                                                                                                                   0.0s
+ => => transferring dockerfile: 215B                                                                                                                                                                   0.0s
+ => [internal] load metadata for docker.io/library/node:22.23.3-bookworm-slim                                                                                                                          0.6s
+ => [internal] load .dockerignore                                                                                                                                                                      0.0s
+ => => transferring context: 137B                                                                                                                                                                      0.0s
+ => [1/4] FROM docker.io/library/node:22.23.3-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392                                                                    3.2s
+ => => resolve docker.io/library/node:22.23.3-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392                                                                    0.0s
+ => => sha256:f0400f4b55b0ad346bf6167a1b64a258e4d73db608c457798ce35e4ffeebfaaf 3.31kB / 3.31kB                                                                                                         0.2s
+ => => sha256:d22c69a95cf463f4cb74462bd2899597ce505d82bd4c01ceddf7845e12f13856 49.84MB / 49.84MB                                                                                                       2.1s
+ => => sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392 5.22kB / 5.22kB                                                                                                         0.0s
+ => => sha256:efd0ab5780c2d9ab1f0f869571a00d5edb17793bff4cce4a2792e3eb0ffc7562 1.93kB / 1.93kB                                                                                                         0.0s
+ => => sha256:d0a16be756b6ec6658aecb8b7bcf87fa6c7d0d7fcc6ca53ad14bb49a4c90bdd7 6.77kB / 6.77kB                                                                                                         0.0s
+ => => sha256:7fd1ebe418b5079d4aa36f416af9b143d127bc75b0155d71cb5fd559b5e04d39 28.25MB / 28.25MB                                                                                                       0.9s
+ => => sha256:2cfab517365cfc6b4bd1f8c4cb01754884ef75bc38758b3c41e291c696f019f5 1.71MB / 1.71MB                                                                                                         0.6s
+ => => sha256:a8de9fa052209313d8e45435a8486e29b20eebaa820e2e7f63a7c3c94b4fa567 448B / 448B                                                                                                             0.7s
+ => => extracting sha256:7fd1ebe418b5079d4aa36f416af9b143d127bc75b0155d71cb5fd559b5e04d39                                                                                                              0.7s
+ => => extracting sha256:f0400f4b55b0ad346bf6167a1b64a258e4d73db608c457798ce35e4ffeebfaaf                                                                                                              0.0s
+ => => extracting sha256:d22c69a95cf463f4cb74462bd2899597ce505d82bd4c01ceddf7845e12f13856                                                                                                              0.9s
+ => => extracting sha256:2cfab517365cfc6b4bd1f8c4cb01754884ef75bc38758b3c41e291c696f019f5                                                                                                              0.0s
+ => => extracting sha256:a8de9fa052209313d8e45435a8486e29b20eebaa820e2e7f63a7c3c94b4fa567                                                                                                              0.0s
+ => [internal] load build context                                                                                                                                                                      0.0s
+ => => transferring context: 2.10kB                                                                                                                                                                    0.0s
+ => [2/4] WORKDIR /app                                                                                                                                                                                 0.1s
+ => [3/4] COPY --chown=node:node package.json ./                                                                                                                                                       0.0s
+ => [4/4] COPY --chown=node:node src/ ./src/                                                                                                                                                           0.0s
+ => exporting to image                                                                                                                                                                                 0.0s
+ => => exporting layers                                                                                                                                                                                0.0s
+ => => writing image sha256:2eb6adeaa9ef93513f8b04e076fcc9bf598d9d4f885f7542b238256f980476a9                                                                                                           0.0s
+ => => naming to docker.io/library/cs554-midterm:v1                                                                                                                                                    0.0s
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo docker run -d \
+  --name cs554-part1 \
+  -p 127.0.0.1:8080:8080 \
+  cs554-midterm:v1
+889f45a443e446a0e1a9e6624142e315ca5fd412f474efcd2f97b60f28b5fd9c
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo docker ps --filter name=cs554-part1
+CONTAINER ID   IMAGE              COMMAND                  CREATED          STATUS          PORTS                      NAMES
+889f45a443e4   cs554-midterm:v1   "docker-entrypoint.s…"   11 seconds ago   Up 11 seconds   127.0.0.1:8080->8080/tcp   cs554-part1
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ curl -i -w '\n' http://localhost:8080/
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Sun, 18 Oct 2026 22:01:15 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+{"service":"cs454-midterm","message":"Hello from the mini-project!","hostname":"889f45a443e4","requestCount":1}
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ curl -i -w '\n' http://localhost:8080/health
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Sun, 18 Oct 2026 22:01:23 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+{"status":"ok"}
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo docker logs cs554-part1
+Listening on port 8080
+{"method":"GET","path":"/","status":200}
+{"method":"GET","path":"/health","status":200}
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ multipass version
+Command 'multipass' not found, but can be installed with:
+sudo snap install multipass
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo snap install multipass
+[sudo] password for yuxuan: 
+multipass 1.16.4 from Canonical✓ installed
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ multipass version
+multipass   1.16.4
+multipassd  1.16.4
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo multipass get local.driver
+get failed: The client is not authenticated with the Multipass service.
+Please use 'multipass authenticate' before proceeding.
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ multipass get local.driver
+qemu
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ multipass launch 24.04 \
+  --name cs554-midterm \
+  --cpus 4 \
+  --memory 4G \
+  --disk 30G
+Launched: cs554-midterm
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ multipass info cs554-midterm
+Name:           cs554-midterm
+State:          Running
+Snapshots:      0
+IPv4:           10.213.186.117
+Release:        Ubuntu 24.04.5 LTS
+Image hash:     04e8f2461a16 (Ubuntu 24.04 LTS)
+CPU(s):         4
+Load:           0.00 0.00 0.00
+Disk usage:     1.9GiB out of 29.0GiB
+Memory usage:   407.6MiB out of 3.8GiB
+Mounts:         --
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ multipass shell cs554-midterm
+Welcome to Ubuntu 24.04.5 LTS (GNU/Linux 6.8.0-147-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Sun Oct 18 20:35:42 CDT 2026
+
+  System load:  0.0               Processes:             124
+  Usage of /:   6.7% of 28.02GB   Users logged in:       0
+  Memory usage: 6%                IPv4 address for ens3: 10.213.186.117
+  Swap usage:   0%
+
+
+Expanded Security Maintenance for Applications is not enabled.
+
+0 updates can be applied immediately.
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+New release '26.04.1 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+
+To run a command as administrator (user "root"), use "sudo <command>".
+See "man sudo_root" for details.
+
+ubuntu@cs554-midterm:~$ hostname
+cs554-midterm
+ubuntu@cs554-midterm:~$ sudo apt update
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Get:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Get:3 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Get:4 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [46.4 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Get:6 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [76.3 kB]
+Get:7 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [181 kB]
+Get:8 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [388 kB]
+Get:9 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+Get:10 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [5760 B]
+Get:11 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [12.6 kB]
+Fetched 1089 kB in 1s (739 kB/s)                                           
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+ubuntu@cs554-midterm:~$ sudo apt install -y ca-certificates curl
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ca-certificates is already the newest version (20260601~24.04.1).
+ca-certificates set to manually installed.
+curl is already the newest version (8.5.0-2ubuntu10.16).
+curl set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+ubuntu@cs554-midterm:~$ sudo install -m 0755 -d /etc/apt/keyrings
+ubuntu@cs554-midterm:~$ sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+ubuntu@cs554-midterm:~$ sudo chmod a+r /etc/apt/keyrings/docker.asc
+ubuntu@cs554-midterm:~$ ls -l /etc/apt/keyrings/docker.asc
+ubuntu@cs554-midterm:~$ sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: noble
+Components: stable
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: noble
+Components: stable
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/docker.asc
+ubuntu@cs554-midterm:~$ sudo apt update
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Get:2 https://download.docker.com/linux/ubuntu noble InRelease [48.5 kB]
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease                
+Get:4 https://download.docker.com/linux/ubuntu noble/stable amd64 Packages [70.2 kB]
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Fetched 119 kB in 0s (271 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+ubuntu@cs554-midterm:~$ sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  docker-ce-rootless-extras pigz
+Suggested packages:
+  cgroupfs-mount | cgroup-lite docker-model-plugin
+The following NEW packages will be installed:
+  containerd.io docker-buildx-plugin docker-ce docker-ce-cli docker-ce-rootless-extras docker-compose-plugin pigz
+0 upgraded, 7 newly installed, 0 to remove and 0 not upgraded.
+Need to get 102 MB of archives.
+After this operation, 388 MB of additional disk space will be used.
+Get:1 https://download.docker.com/linux/ubuntu noble/stable amd64 containerd.io amd64 2.4.2-2~ubuntu.24.04~noble [23.3 MB]
+Get:2 http://archive.ubuntu.com/ubuntu noble/universe amd64 pigz amd64 2.8-1 [65.6 kB]
+Get:3 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-ce-cli amd64 5:29.9.1-1~ubuntu.24.04~noble [17.6 MB]
+Get:4 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-ce amd64 5:29.9.1-1~ubuntu.24.04~noble [24.5 MB]
+Get:5 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-buildx-plugin amd64 0.38.0-1~ubuntu.24.04~noble [17.8 MB]
+Get:6 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-ce-rootless-extras amd64 5:29.9.1-1~ubuntu.24.04~noble [10.2 MB]
+Get:7 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-compose-plugin amd64 5.6.0-1~ubuntu.24.04~noble [8080 kB]
+Fetched 102 MB in 2s (41.2 MB/s)                
+Selecting previously unselected package containerd.io.
+(Reading database ... 75072 files and directories currently installed.)
+Preparing to unpack .../0-containerd.io_2.4.2-2~ubuntu.24.04~noble_amd64.deb ...
+Unpacking containerd.io (2.4.2-2~ubuntu.24.04~noble) ...
+Selecting previously unselected package docker-ce-cli.
+Preparing to unpack .../1-docker-ce-cli_5%3a29.9.1-1~ubuntu.24.04~noble_amd64.deb ...
+Unpacking docker-ce-cli (5:29.9.1-1~ubuntu.24.04~noble) ...
+Selecting previously unselected package docker-ce.
+Preparing to unpack .../2-docker-ce_5%3a29.9.1-1~ubuntu.24.04~noble_amd64.deb ...
+Unpacking docker-ce (5:29.9.1-1~ubuntu.24.04~noble) ...
+Selecting previously unselected package pigz.
+Preparing to unpack .../3-pigz_2.8-1_amd64.deb ...
+Unpacking pigz (2.8-1) ...
+Selecting previously unselected package docker-buildx-plugin.
+Preparing to unpack .../4-docker-buildx-plugin_0.38.0-1~ubuntu.24.04~noble_amd64.deb ...
+Unpacking docker-buildx-plugin (0.38.0-1~ubuntu.24.04~noble) ...
+Selecting previously unselected package docker-ce-rootless-extras.
+Preparing to unpack .../5-docker-ce-rootless-extras_5%3a29.9.1-1~ubuntu.24.04~noble_amd64.deb ...
+Unpacking docker-ce-rootless-extras (5:29.9.1-1~ubuntu.24.04~noble) ...
+Selecting previously unselected package docker-compose-plugin.
+Preparing to unpack .../6-docker-compose-plugin_5.6.0-1~ubuntu.24.04~noble_amd64.deb ...
+Unpacking docker-compose-plugin (5.6.0-1~ubuntu.24.04~noble) ...
+Setting up docker-buildx-plugin (0.38.0-1~ubuntu.24.04~noble) ...
+Setting up containerd.io (2.4.2-2~ubuntu.24.04~noble) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/containerd.service → /usr/lib/systemd/system/containerd.service.
+Setting up docker-compose-plugin (5.6.0-1~ubuntu.24.04~noble) ...
+Setting up docker-ce-cli (5:29.9.1-1~ubuntu.24.04~noble) ...
+Setting up pigz (2.8-1) ...
+Setting up docker-ce-rootless-extras (5:29.9.1-1~ubuntu.24.04~noble) ...
+Setting up docker-ce (5:29.9.1-1~ubuntu.24.04~noble) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/docker.service → /usr/lib/systemd/system/docker.service.
+Created symlink /etc/systemd/system/sockets.target.wants/docker.socket → /usr/lib/systemd/system/docker.socket.
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...                                                                                                                                                                                       
+Scanning linux images...                                                                                                                                                                                    
+
+Running kernel seems to be up-to-date.
+
+No services need to be restarted.
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+ubuntu@cs554-midterm:~$ sudo docker version
+Client: Docker Engine - Community
+ Version:           29.9.1
+ API version:       1.56
+ Go version:        go1.26.9
+ Git commit:        dfc520d
+ Built:             Wed Oct 14 18:32:55 2026
+ OS/Arch:           linux/amd64
+ Context:           default
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          29.9.1
+  API version:      1.56 (minimum version 1.40)
+  Go version:       go1.26.9
+  Git commit:       b26fb77
+  Built:            Wed Oct 14 18:32:55 2026
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          v2.4.2
+  GitCommit:        b7a25261e029d68978bbf290df0a62fc819b3c51
+ runc:
+  Version:          1.5.2
+  GitCommit:        v1.5.2-0-g29dd3dc2
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+ubuntu@cs554-midterm:~$ sudo docker compose version
+Docker Compose version v5.6.0
+ubuntu@cs554-midterm:~$ sudo docker run --rm hello-world
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+4f55086f7dd0: Pull complete 
+d5e71e642bf5: Download complete 
+Digest: sha256:11a3eb1597e864c51b3f56733cb2e8a90bf0c284bfc05f9444d81c558bc848aa
+Status: Downloaded newer image for hello-world:latest
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+    (amd64)
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker ID:
+ https://hub.docker.com/
+
+For more examples and ideas, visit:
+ https://docs.docker.com/get-started/
+
+ubuntu@cs554-midterm:~$ exit
+logout
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo docker save cs554-midterm:v1 > ~/cs554-midterm-v1.tar
+[sudo] password for yuxuan: 
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ ls -lh ~/cs554-midterm-v1.tar
+-rw-rw-r-- 1 yuxuan yuxuan 222M Oct 18 21:29 /home/yuxuan/cs554-midterm-v1.tar
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ multipass transfer ~/cs554-midterm-v1.tar cs554-midterm:/home/ubuntu/cs554-midterm-v1.tar
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ multipass shell cs554-midterm
+Welcome to Ubuntu 24.04.5 LTS (GNU/Linux 6.8.0-147-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Sun Oct 18 21:32:23 CDT 2026
+
+  System load:  0.0               Processes:             128
+  Usage of /:   8.0% of 28.02GB   Users logged in:       0
+  Memory usage: 7%                IPv4 address for ens3: 10.213.186.117
+  Swap usage:   0%
+
+ * Canonical Workshop gives developers fast, composable, reproducible, and
+   secure developer environments that are perfect for agentic workflows.
+
+   https://ubuntu.com/workshop
+
+Expanded Security Maintenance for Applications is not enabled.
+
+0 updates can be applied immediately.
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+New release '26.04.1 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+
+Last login: Sun Oct 18 20:35:42 2026 from 10.213.186.1
+ubuntu@cs554-midterm:~$ ls -lh ~/cs554-midterm-v1.tar
+-rw-rw-r-- 1 ubuntu ubuntu 222M Oct 18 21:32 /home/ubuntu/cs554-midterm-v1.tar
+ubuntu@cs554-midterm:~$ sudo docker load -i ~/cs554-midterm-v1.tar
+Loaded image: cs554-midterm:v1
+ubuntu@cs554-midterm:~$ sudo docker image ls cs554-midterm:v1
+                                                                                                                                                                                        i Info →   U  In Use
+IMAGE              ID             DISK USAGE   CONTENT SIZE   EXTRA
+cs554-midterm:v1   542310d2b52a        479MB          232MB        
+ubuntu@cs554-midterm:~$ sudo docker run --rm --entrypoint sh cs554-midterm:v1 -c 'grep -Rn "process\.env" /app/src'
+/app/src/server.js:5:  const serviceName = options.serviceName ?? process.env.SERVICE_NAME ?? 'cs454-midterm';
+/app/src/server.js:6:  const message = options.message ?? process.env.MESSAGE ?? 'Hello from the mini-project!';
+/app/src/server.js:27:  const port = Number(process.env.PORT ?? 8080);
+ubuntu@cs554-midterm:~$ exit
+logout
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ cd ~/Desktop/cs454_midterm_Yuxuan
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ cat > compose.yaml <<'EOF'
+services:
+  web:
+    image: cs554-midterm:v1
+    pull_policy: never
+    environment:
+      PORT: "8080"
+      SERVICE_NAME: "cs554-midterm-compose"
+      MESSAGE: "Hello from Docker Compose inside the VM!"
+    ports:
+      - "8080:8080"
+EOF
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ cat compose.yaml
+services:
+  web:
+    image: cs554-midterm:v1
+    pull_policy: never
+    environment:
+      PORT: "8080"
+      SERVICE_NAME: "cs554-midterm-compose"
+      MESSAGE: "Hello from Docker Compose inside the VM!"
+    ports:
+      - "8080:8080"
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ multipass transfer --parents compose.yaml cs554-midterm:/home/ubuntu/cs554-midterm/compose.yaml
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ multipass shell cs554-midterm
+Welcome to Ubuntu 24.04.5 LTS (GNU/Linux 6.8.0-147-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Sun Oct 18 21:48:45 CDT 2026
+
+  System load:  0.0                Processes:             125
+  Usage of /:   10.3% of 28.02GB   Users logged in:       0
+  Memory usage: 8%                 IPv4 address for ens3: 10.213.186.117
+  Swap usage:   0%
+
+ * Canonical Workshop gives developers fast, composable, reproducible, and
+   secure developer environments that are perfect for agentic workflows.
+
+   https://ubuntu.com/workshop
+
+Expanded Security Maintenance for Applications is not enabled.
+
+0 updates can be applied immediately.
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+New release '26.04.1 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+
+Last login: Sun Oct 18 21:32:32 2026 from 10.213.186.1
+ubuntu@cs554-midterm:~$ cd ~/cs554-midterm
+ubuntu@cs554-midterm:~/cs554-midterm$ sudo docker compose config
+name: cs554-midterm
+services:
+  web:
+    environment:
+      MESSAGE: Hello from Docker Compose inside the VM!
+      PORT: "8080"
+      SERVICE_NAME: cs554-midterm-compose
+    image: cs554-midterm:v1
+    networks:
+      default: null
+    pull_policy: never
+    ports:
+      - mode: ingress
+        target: 8080
+        published: "8080"
+        protocol: tcp
+networks:
+  default:
+    name: cs554-midterm_default
+ubuntu@cs554-midterm:~/cs554-midterm$ sudo docker compose up -d
+[+] up 2/2
+ ✔ Network cs554-midterm_default Created                                                                                                                                                                0.0s
+ ✔ Container cs554-midterm-web-1 Started                                                                                                                                                                0.2s
+ubuntu@cs554-midterm:~/cs554-midterm$ sudo docker compose ps
+NAME                  IMAGE              COMMAND                  SERVICE   CREATED         STATUS         PORTS
+cs554-midterm-web-1   cs554-midterm:v1   "docker-entrypoint.s…"   web       7 seconds ago   Up 7 seconds   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp
+ubuntu@cs554-midterm:~/cs554-midterm$ curl -i -w '\n' http://localhost:8080/
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Mon, 19 Oct 2026 02:52:56 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+{"service":"cs554-midterm-compose","message":"Hello from Docker Compose inside the VM!","hostname":"95b02f2d2fe6","requestCount":1}
+ubuntu@cs554-midterm:~/cs554-midterm$ curl -i -w '\n' http://localhost:8080/health
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Mon, 19 Oct 2026 02:53:17 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+{"status":"ok"}
+ubuntu@cs554-midterm:~/cs554-midterm$ sudo docker compose logs --no-color web
+web-1  | Listening on port 8080
+web-1  | {"method":"GET","path":"/","status":200}
+web-1  | {"method":"GET","path":"/health","status":200}
+ubuntu@cs554-midterm:~/cs554-midterm$ exit
+logout
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ multipass info cs554-midterm
+Name:           cs554-midterm
+State:          Running
+Snapshots:      0
+IPv4:           10.213.186.117
+                172.17.0.1
+                172.18.0.1
+Release:        Ubuntu 24.04.5 LTS
+Image hash:     04e8f2461a16 (Ubuntu 24.04 LTS)
+CPU(s):         4
+Load:           0.00 0.00 0.00
+Disk usage:     3.0GiB out of 29.0GiB
+Memory usage:   509.9MiB out of 3.8GiB
+Mounts:         --
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ curl -i -w '\n' http://10.213.186.117:8080/
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Mon, 19 Oct 2026 03:00:05 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+{"service":"cs554-midterm-compose","message":"Hello from Docker Compose inside the VM!","hostname":"95b02f2d2fe6","requestCount":2}
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ multipass shell cs554-midterm
+Welcome to Ubuntu 24.04.5 LTS (GNU/Linux 6.8.0-147-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Sun Oct 18 22:07:38 CDT 2026
+
+  System load:  0.0                Processes:             128
+  Usage of /:   10.3% of 28.02GB   Users logged in:       0
+  Memory usage: 9%                 IPv4 address for ens3: 10.213.186.117
+  Swap usage:   0%
+
+ * Canonical Workshop gives developers fast, composable, reproducible, and
+   secure developer environments that are perfect for agentic workflows.
+
+   https://ubuntu.com/workshop
+
+Expanded Security Maintenance for Applications is not enabled.
+
+0 updates can be applied immediately.
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+New release '26.04.1 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+
+Last login: Sun Oct 18 21:49:45 2026 from 10.213.186.1
+ubuntu@cs554-midterm:~$ cd ~/cs554-midterm
+ubuntu@cs554-midterm:~/cs554-midterm$ curl -i -w '\n' http://localhost:8080/
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Mon, 19 Oct 2026 03:08:18 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+{"service":"cs554-midterm-compose","message":"Hello from Docker Compose inside the VM!","hostname":"95b02f2d2fe6","requestCount":3}
+ubuntu@cs554-midterm:~/cs554-midterm$ sudo docker compose restart web
+[+] restart 0/1
+ ⠹ Container cs554-midterm-web-1 Restarting                                                                                                                                                             0.2s
+ubuntu@cs554-midterm:~/cs554-midterm$ curl -i -w '\n' http://localhost:8080/
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Mon, 19 Oct 2026 03:09:22 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+{"service":"cs554-midterm-compose","message":"Hello from Docker Compose inside the VM!","hostname":"95b02f2d2fe6","requestCount":1}
+ubuntu@cs554-midterm:~/cs554-midterm$ exit
+logout
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ ip route get 10.213.186.117
+10.213.186.117 dev mpqemubr0 src 10.213.186.1 uid 1000 
+    cache 

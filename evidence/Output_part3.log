@@ -1,0 +1,434 @@
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo k3d version
+[sudo] password for yuxuan: 
+k3d version v5.9.0
+k3s version v1.35.5-k3s1 (default)
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ kubectl version --client
+Client Version: v1.35.5
+Kustomize Version: v5.7.1
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo k3d cluster create cs554-midterm --servers 1 --agents 0
+[sudo] password for yuxuan: 
+INFO[0000] Prep: Network                                
+INFO[0000] Created network 'k3d-cs554-midterm'          
+INFO[0000] Created image volume k3d-cs554-midterm-images 
+INFO[0000] Starting new tools node...                   
+INFO[0000] Pulling image 'ghcr.io/k3d-io/k3d-tools:5.9.0' 
+INFO[0001] Creating node 'k3d-cs554-midterm-server-0'   
+INFO[0001] Starting node 'k3d-cs554-midterm-tools'      
+INFO[0001] Pulling image 'docker.io/rancher/k3s:v1.35.5-k3s1' 
+INFO[0004] Creating LoadBalancer 'k3d-cs554-midterm-serverlb' 
+INFO[0005] Pulling image 'ghcr.io/k3d-io/k3d-proxy:5.9.0' 
+INFO[0006] Using the k3d-tools node to gather environment information 
+INFO[0007] HostIP: using network gateway 172.18.0.1 address 
+INFO[0007] Starting cluster 'cs554-midterm'             
+INFO[0007] Starting servers...                          
+INFO[0007] Starting node 'k3d-cs554-midterm-server-0'   
+INFO[0012] All agents already running.                  
+INFO[0012] Starting helpers...                          
+INFO[0012] Starting node 'k3d-cs554-midterm-serverlb'   
+INFO[0018] Injecting records for hostAliases (incl. host.k3d.internal) and for 2 network members into CoreDNS configmap... 
+INFO[0020] Cluster 'cs554-midterm' created successfully! 
+INFO[0020] You can now use it like this:                
+kubectl cluster-info
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl get nodes -o wide
+NAME                         STATUS   ROLES           AGE   VERSION        INTERNAL-IP   EXTERNAL-IP   OS-IMAGE           KERNEL-VERSION      CONTAINER-RUNTIME
+k3d-cs554-midterm-server-0   Ready    control-plane   14s   v1.35.5+k3s1   172.18.0.2    <none>        K3s v1.35.5+k3s1   6.8.0-138-generic   containerd://2.2.3-k3s1
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo k3d image import cs554-midterm:v1 -c cs554-midterm
+[sudo] password for yuxuan: 
+INFO[0000] Importing image(s) into cluster 'cs554-midterm' 
+INFO[0000] Starting new tools node...                   
+INFO[0000] Starting node 'k3d-cs554-midterm-tools'      
+INFO[0000] Saving 1 image(s) from runtime...            
+INFO[0002] Importing images into nodes...               
+INFO[0002] Importing images from tarball '/k3d/images/k3d-cs554-midterm-images-20261019184131.tar' into node 'k3d-cs554-midterm-server-0'... 
+INFO[0004] Removing the tarball(s) from image volume... 
+INFO[0005] Removing k3d-tools node...                   
+INFO[0005] Successfully imported image(s)               
+INFO[0005] Successfully imported 1 image(s) into 1 cluster(s) 
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ mkdir -p k8s
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ cat > k8s/deployment.yaml <<'EOF'
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cs554-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cs554-web
+  template:
+    metadata:
+      labels:
+        app: cs554-web
+    spec:
+      containers:
+        - name: web
+          image: cs554-midterm:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: SERVICE_NAME
+              value: "cs554-midterm-kubernetes"
+            - name: MESSAGE
+              value: "Hello from Kubernetes!"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "500m"
+              memory: "128Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 2
+EOF
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl apply -f k8s/deployment.yaml
+deployment.apps/cs554-web created
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl rollout status deployment/cs554-web --timeout=120s
+deployment "cs554-web" successfully rolled out
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl get deployment cs554-web
+NAME        READY   UP-TO-DATE   AVAILABLE   AGE
+cs554-web   2/2     2            2           56s
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl get pods -l app=cs554-web -o wide
+NAME                         READY   STATUS    RESTARTS   AGE   IP           NODE                         NOMINATED NODE   READINESS GATES
+cs554-web-5d45fb7bb6-jnnff   1/1     Running   0          65s   10.42.0.10   k3d-cs554-midterm-server-0   <none>           <none>
+cs554-web-5d45fb7bb6-qpb6g   1/1     Running   0          65s   10.42.0.9    k3d-cs554-midterm-server-0   <none>           <none>
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl apply -f k8s/service.yaml
+[sudo] password for yuxuan: 
+service/cs554-web created
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl get service cs554-web
+NAME        TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+cs554-web   ClusterIP   10.43.80.179   <none>        8080/TCP   38s
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl get endpointslices -l kubernetes.io/service-name=cs554-web -o wide
+NAME              ADDRESSTYPE   PORTS   ENDPOINTS              AGE
+cs554-web-wx8bq   IPv4          8080    10.42.0.9,10.42.0.10   63s
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl port-forward service/cs554-web 8081:8080
+[sudo] password for yuxuan: 
+Forwarding from 127.0.0.1:8081 -> 8080
+Forwarding from [::1]:8081 -> 8080
+Handling connection for 8081
+Handling connection for 8081
+Handling connection for 8081
+Handling connection for 8081
+Handling connection for 8081
+
+
+### Another new terminal window: (record in screenshot part3_another_terminal.png)
+
+yuxuan@yuxuan-Alienware-x15-R1:~$ curl -i http://127.0.0.1:8081/
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Tue, 20 Oct 2026 00:45:30 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+yuxuan@yuxuan-Alienware-x15-R1:~$ curl -sS -w '\nHTTP %{http_code}, bytes %{size_download}\n' http://127.0.0.1:8081/
+{"service":"cs554-midterm-kubernetes","message":"Hello from Kubernetes!","hostname":"cs554-web-5d45fb7bb6-jnnff","requestCount":2}
+HTTP 200, bytes 130
+yuxuan@yuxuan-Alienware-x15-R1:~$ curl -sS -w '\nHTTP %{http_code}, bytes %{size_download}\n' http://127.0.0.1:8081/health
+{"status":"ok"}
+HTTP 200, bytes 15
+yuxuan@yuxuan-Alienware-x15-R1:~$ curl -i -w '\n' http://localhost:8081/
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Tue, 20 Oct 2026 01:09:27 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+{"service":"cs554-midterm-kubernetes","message":"Hello from Kubernetes!","hostname":"cs554-web-5d45fb7bb6-jnnff","requestCount":3}
+yuxuan@yuxuan-Alienware-x15-R1:~$ curl -i -w '\n' http://localhost:8081/health
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Tue, 20 Oct 2026 01:11:40 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+{"status":"ok"}
+
+yuxuan@yuxuan-Alienware-x15-R1:~$ sudo kubectl get pods -l app=cs554-web -o wide
+[sudo] password for yuxuan: 
+NAME                         READY   STATUS    RESTARTS   AGE   IP           NODE                         NOMINATED NODE   READINESS GATES
+cs554-web-5d45fb7bb6-jnnff   1/1     Running   0          84m   10.42.0.10   k3d-cs554-midterm-server-0   <none>           <none>
+cs554-web-5d45fb7bb6-qpb6g   1/1     Running   0          84m   10.42.0.9    k3d-cs554-midterm-server-0   <none>           <none>
+yuxuan@yuxuan-Alienware-x15-R1:~$ sudo kubectl delete pod cs554-web-5d45fb7bb6-qpb6g
+pod "cs554-web-5d45fb7bb6-qpb6g" deleted from default namespace
+yuxuan@yuxuan-Alienware-x15-R1:~$ sudo kubectl get pods -l app=cs554-web -o wide
+NAME                         READY   STATUS    RESTARTS   AGE   IP           NODE                         NOMINATED NODE   READINESS GATES
+cs554-web-5d45fb7bb6-7j9cb   1/1     Running   0          3s    10.42.0.11   k3d-cs554-midterm-server-0   <none>           <none>
+cs554-web-5d45fb7bb6-jnnff   1/1     Running   0          87m   10.42.0.10   k3d-cs554-midterm-server-0   <none>           <none>
+yuxuan@yuxuan-Alienware-x15-R1:~$ sudo kubectl get deployment cs554-web
+NAME        READY   UP-TO-DATE   AVAILABLE   AGE
+cs554-web   2/2     2            2           88m
+
+
+### Return to directory terminal: 
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ cp k8s/deployment.yaml /tmp/cs554-deployment-before-readiness.yaml
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl get pods -l app=cs554-web -o wide
+[sudo] password for yuxuan: 
+NAME                         READY   STATUS    RESTARTS   AGE    IP           NODE                         NOMINATED NODE   READINESS GATES
+cs554-web-5d45fb7bb6-7j9cb   1/1     Running   0          39m    10.42.0.11   k3d-cs554-midterm-server-0   <none>           <none>
+cs554-web-5d45fb7bb6-jnnff   1/1     Running   0          126m   10.42.0.10   k3d-cs554-midterm-server-0   <none>           <none>
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ cat k8s/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cs554-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cs554-web
+  template:
+    metadata:
+      labels:
+        app: cs554-web
+    spec:
+      containers:
+        - name: web
+          image: cs554-midterm:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: SERVICE_NAME
+              value: "cs554-midterm-kubernetes"
+            - name: MESSAGE
+              value: "Hello from Kubernetes!"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "500m"
+              memory: "128Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 2
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl apply -f k8s/deployment.yaml
+deployment.apps/cs554-web configured
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl rollout status deployment/cs554-web --timeout=120s
+deployment "cs554-web" successfully rolled out
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl get pods -l app=cs554-web -o wide
+NAME                         READY   STATUS    RESTARTS   AGE   IP           NODE                         NOMINATED NODE   READINESS GATES
+cs554-web-584d6dbd57-g89vp   1/1     Running   0          30s   10.42.0.13   k3d-cs554-midterm-server-0   <none>           <none>
+cs554-web-584d6dbd57-hbg68   1/1     Running   0          32s   10.42.0.12   k3d-cs554-midterm-server-0   <none>           <none>
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl get endpointslices -l kubernetes.io/service-name=cs554-web -o yaml
+apiVersion: v1
+items:
+- addressType: IPv4
+  apiVersion: discovery.k8s.io/v1
+  endpoints:
+  - addresses:
+    - 10.42.0.12
+    conditions:
+      ready: true
+      serving: true
+      terminating: false
+    nodeName: k3d-cs554-midterm-server-0
+    targetRef:
+      kind: Pod
+      name: cs554-web-584d6dbd57-hbg68
+      namespace: default
+      uid: 2c749d03-2792-49ac-a7cf-e8476ffaa2e8
+  - addresses:
+    - 10.42.0.13
+    conditions:
+      ready: true
+      serving: true
+      terminating: false
+    nodeName: k3d-cs554-midterm-server-0
+    targetRef:
+      kind: Pod
+      name: cs554-web-584d6dbd57-g89vp
+      namespace: default
+      uid: 914e34e8-915a-4be9-a25c-8983afb7603a
+  kind: EndpointSlice
+  metadata:
+    annotations:
+      endpoints.kubernetes.io/last-change-trigger-time: "2026-10-20T02:07:56Z"
+    creationTimestamp: "2026-10-20T00:12:55Z"
+    generateName: cs554-web-
+    generation: 13
+    labels:
+      endpointslice.kubernetes.io/managed-by: endpointslice-controller.k8s.io
+      kubernetes.io/service-name: cs554-web
+    name: cs554-web-wx8bq
+    namespace: default
+    ownerReferences:
+    - apiVersion: v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Service
+      name: cs554-web
+      uid: 4efc5156-3f23-40d0-80c5-36b6964d3eaa
+    resourceVersion: "4401"
+    uid: 8c799b60-a0da-4b74-be8d-c63975208567
+  ports:
+  - name: ""
+    port: 8080
+    protocol: TCP
+kind: List
+metadata:
+  resourceVersion: ""
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl exec cs554-web-584d6dbd57-hbg68 -- touch /tmp/not-ready
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl wait --for=condition=Ready=false pod/cs554-web-584d6dbd57-hbg68 --timeout=60s
+pod/cs554-web-584d6dbd57-hbg68 condition met
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl get pods -l app=cs554-web -o wide
+NAME                         READY   STATUS    RESTARTS   AGE     IP           NODE                         NOMINATED NODE   READINESS GATES
+cs554-web-584d6dbd57-g89vp   1/1     Running   0          6m46s   10.42.0.13   k3d-cs554-midterm-server-0   <none>           <none>
+cs554-web-584d6dbd57-hbg68   0/1     Running   0          6m48s   10.42.0.12   k3d-cs554-midterm-server-0   <none>           <none>
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl get endpointslices -l kubernetes.io/service-name=cs554-web -o yaml
+apiVersion: v1
+items:
+- addressType: IPv4
+  apiVersion: discovery.k8s.io/v1
+  endpoints:
+  - addresses:
+    - 10.42.0.12
+    conditions:
+      ready: false
+      serving: false
+      terminating: false
+    nodeName: k3d-cs554-midterm-server-0
+    targetRef:
+      kind: Pod
+      name: cs554-web-584d6dbd57-hbg68
+      namespace: default
+      uid: 2c749d03-2792-49ac-a7cf-e8476ffaa2e8
+  - addresses:
+    - 10.42.0.13
+    conditions:
+      ready: true
+      serving: true
+      terminating: false
+    nodeName: k3d-cs554-midterm-server-0
+    targetRef:
+      kind: Pod
+      name: cs554-web-584d6dbd57-g89vp
+      namespace: default
+      uid: 914e34e8-915a-4be9-a25c-8983afb7603a
+  kind: EndpointSlice
+  metadata:
+    annotations:
+      endpoints.kubernetes.io/last-change-trigger-time: "2026-10-20T02:13:34Z"
+    creationTimestamp: "2026-10-20T00:12:55Z"
+    generateName: cs554-web-
+    generation: 14
+    labels:
+      endpointslice.kubernetes.io/managed-by: endpointslice-controller.k8s.io
+      kubernetes.io/service-name: cs554-web
+    name: cs554-web-wx8bq
+    namespace: default
+    ownerReferences:
+    - apiVersion: v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Service
+      name: cs554-web
+      uid: 4efc5156-3f23-40d0-80c5-36b6964d3eaa
+    resourceVersion: "4513"
+    uid: 8c799b60-a0da-4b74-be8d-c63975208567
+  ports:
+  - name: ""
+    port: 8080
+    protocol: TCP
+kind: List
+metadata:
+  resourceVersion: ""
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl exec cs554-web-584d6dbd57-hbg68 -- node -e 'fetch("http://127.0.0.1:8080/health", {signal: AbortSignal.timeout(5000)}).then(async r => { console.log("HTTP", r.status); console.log(await r.text()); }).catch(e => { console.error(e.message); process.exit(1); });'
+HTTP 200
+{"status":"ok"}
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl exec cs554-web-584d6dbd57-g89vp -- node -e 'fetch("http://cs554-web:8080/", {signal: AbortSignal.timeout(5000)}).then(async r => { console.log("HTTP", r.status); console.log(await r.text()); }).catch(e => { console.error(e.message); process.exit(1); });'
+HTTP 200
+{"service":"cs554-midterm-kubernetes","message":"Hello from Kubernetes!","hostname":"cs554-web-584d6dbd57-g89vp","requestCount":1}
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl exec cs554-web-584d6dbd57-hbg68 -- rm /tmp/not-ready
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl wait --for=condition=Ready pod/cs554-web-584d6dbd57-hbg68 --timeout=60s
+pod/cs554-web-584d6dbd57-hbg68 condition met
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl get pods -l app=cs554-web -o wide
+NAME                         READY   STATUS    RESTARTS   AGE   IP           NODE                         NOMINATED NODE   READINESS GATES
+cs554-web-584d6dbd57-g89vp   1/1     Running   0          23m   10.42.0.13   k3d-cs554-midterm-server-0   <none>           <none>
+cs554-web-584d6dbd57-hbg68   1/1     Running   0          23m   10.42.0.12   k3d-cs554-midterm-server-0   <none>           <none>
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl get endpointslices -l kubernetes.io/service-name=cs554-web -o yaml
+apiVersion: v1
+items:
+- addressType: IPv4
+  apiVersion: discovery.k8s.io/v1
+  endpoints:
+  - addresses:
+    - 10.42.0.12
+    conditions:
+      ready: true
+      serving: true
+      terminating: false
+    nodeName: k3d-cs554-midterm-server-0
+    targetRef:
+      kind: Pod
+      name: cs554-web-584d6dbd57-hbg68
+      namespace: default
+      uid: 2c749d03-2792-49ac-a7cf-e8476ffaa2e8
+  - addresses:
+    - 10.42.0.13
+    conditions:
+      ready: true
+      serving: true
+      terminating: false
+    nodeName: k3d-cs554-midterm-server-0
+    targetRef:
+      kind: Pod
+      name: cs554-web-584d6dbd57-g89vp
+      namespace: default
+      uid: 914e34e8-915a-4be9-a25c-8983afb7603a
+  kind: EndpointSlice
+  metadata:
+    annotations:
+      endpoints.kubernetes.io/last-change-trigger-time: "2026-10-20T02:31:26Z"
+    creationTimestamp: "2026-10-20T00:12:55Z"
+    generateName: cs554-web-
+    generation: 15
+    labels:
+      endpointslice.kubernetes.io/managed-by: endpointslice-controller.k8s.io
+      kubernetes.io/service-name: cs554-web
+    name: cs554-web-wx8bq
+    namespace: default
+    ownerReferences:
+    - apiVersion: v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Service
+      name: cs554-web
+      uid: 4efc5156-3f23-40d0-80c5-36b6964d3eaa
+    resourceVersion: "4874"
+    uid: 8c799b60-a0da-4b74-be8d-c63975208567
+  ports:
+  - name: ""
+    port: 8080
+    protocol: TCP
+kind: List
+metadata:
+  resourceVersion: ""
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ cp /tmp/cs554-deployment-before-readiness.yaml k8s/deployment.yaml
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl apply -f k8s/deployment.yaml
+deployment.apps/cs554-web configured
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl rollout status deployment/cs554-web --timeout=120s
+Waiting for deployment "cs554-web" rollout to finish: 1 old replicas are pending termination...
+deployment "cs554-web" successfully rolled out
+yuxuan@yuxuan-Alienware-x15-R1:~/Desktop/cs454_midterm_Yuxuan$ sudo kubectl get pods -l app=cs554-web -o wide
+NAME                         READY   STATUS    RESTARTS   AGE   IP           NODE                         NOMINATED NODE   READINESS GATES
+cs554-web-5d45fb7bb6-9hqzr   1/1     Running   0          26s   10.42.0.15   k3d-cs554-midterm-server-0   <none>           <none>
+cs554-web-5d45fb7bb6-hhmg5   1/1     Running   0          29s   10.42.0.14   k3d-cs554-midterm-server-0   <none>           <none>
+
